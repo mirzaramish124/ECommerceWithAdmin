@@ -1,0 +1,88 @@
+﻿@using ECommerceSiteWithAPIs.Models.Dtos
+@model MeasurmentDto
+@{
+    ViewData["Title"] = "Upsert";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-gradient-dark ml-0 py-1">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h3 class="text-white py-2">@(Model?.Id > 0 ? "Update" : "Create") Measurment</h3>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="card-body p-4" id="measurData">
+        <form method="Post" id="measurmentForm">
+            <input asp-for="Id" id="measurId" hidden />
+            <input asp-for="CreateUser" value="1" hidden />
+            <input asp-for="ModifyUser" value="1" hidden />
+            <div class="row">
+                <div class="col-12">
+                    <div class="border p-3">
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Status</label>
+                            <select asp-for="@Model.Status" id="status" class="form-control border-0 shadow">
+                                <option value="0">Active</option>
+                                <option value="1">Inactive</option>
+                            </select>
+                            <span id="statusVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Type</label>
+                            <select asp-for="@Model.Type" id="status" class="form-control border-0 shadow">
+                                <option value="1">Unit</option>
+                                <option value="2">Size</option>
+                            </select>
+                            <span id="mtypeVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Name</label>
+                            <input type="text" class="form-control border-0 shadow" asp-for="Name" id="measurName" />
+                            <span asp-validation-for="Name" id="measurNameVal" class="text-danger"></span>
+                        </div>
+
+                        <br />
+                        <br />
+                        <div class="row pt-2">
+                            @if (Model?.Id > 0)
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('update')" class="btn btn-info form-control">Update</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('save')" class="btn btn-success form-control">Save</button>
+                                </div>
+                            }
+                            <div class="col-2">
+                                <a asp-area="Admin" asp-controller="Measurment" asp-action="Index" *@ class="btn bg-gradient-dark form-control">Back</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+
+    <script src="~/admin/js/measurment.js"></script>
+    <partial name="_validationscriptspartial" />
+}

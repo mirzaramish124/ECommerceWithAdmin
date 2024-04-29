@@ -1,0 +1,294 @@
+﻿@using ECommerceSiteWithAPIs.Models.Dtos
+@model ProductDto
+@{
+    ViewData["Title"] = "Upsert";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+@* <style>
+    .cd-dropdown {
+        /* min-width: 25em; */
+        position: relative;
+        margin: 1em;
+    }
+
+    .cd-dropdown * {
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+
+    .cd-select {
+        background-color: white;
+        color: black;
+        font-size: 16px;
+        width: 444px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid grey;
+        border-radius: 7px;
+        padding: 0.5em;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .cd-select:focus {
+        outline: none;
+    }
+
+    .caret {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid black;
+        transition: 0.3s;
+        top: 40%;
+        left: 94%;
+        position: absolute;
+    }
+
+    .caret-rotate {
+        transform: rotate(180deg);
+    }
+
+    .cd-menu {
+        list-style: none;
+        padding: 0.2em 0.5em;
+        background: white;
+        border-left: 1px solid gray;
+        border-right: 1px solid gray;
+        border-bottom: 1px solid gray;
+        border-top: transparent;
+        border-bottom-left-radius: 0.5em;
+        border-bottom-right-radius: 0.5em;
+        color: black;
+        width: 444px;
+        position: absolute;
+        top: 38px;
+        left: 13.9rem;
+        display: none;
+        transform: translate(-50%);
+        opacity: 0;
+        transition: 0.2s;
+        z-index: 1;
+        max-height: 235px;
+        overflow-y: auto;
+    }
+
+        .cd-menu li {
+            padding: 0.7em 0.5em;
+            margin: 0.3em 0;
+            border-radius: 0.5em;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            .cd-menu li:hover {
+                background: #2665EA;
+                color: white;
+            }
+
+    .menu-open {
+        display: block;
+        opacity: 1;
+    }
+
+</style> *@
+
+<style>
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #f9f1f1 !important;
+        box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12), 0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07) !important;
+    }
+
+    .select2-container .select2-selection--single {
+        height: 51px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 49px !important;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #344767;
+        margin-left: 11px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 27px !important;
+        position: absolute !important;
+        top: 13px !important;
+        right: 1px !important;
+        width: 27px !important;
+    }
+</style>
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-gradient-dark ml-0 py-1">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h3 class="text-white py-2">@(Model?.Id > 0 ? "Update" : "Create") Product</h3>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="card-body p-4">
+        <form enctype="multipart/form-data" id="proForm" method="Post" asp-action="Upsert">
+            @* <input asp-for="ImageId" id="imageId" hidden /> *@
+            <input asp-for="Id" id="proId" hidden />
+            @* <input asp-for="Image" id="proId" hidden /> *@
+            <input asp-for="CreateUser" value="1" hidden />
+            <input asp-for="ModifyUser" value="1" hidden />
+            <div class="row">
+                <div class="col-10">
+                    <div class="border p-3">
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Status</label>
+                            <select asp-for="@Model.Status" id="status" class="form-control border-0 shadow">
+                                <option value="0">Active</option>
+                                <option value="1">Inactive</option>
+                            </select>
+                            <span id="statusVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Brand</label>
+                            <select asp-items="@ViewBag.BrandList" asp-for="@Model.BrandId" id="ddBrand" class="ddsearch form-control border-0 shadow">
+                                <option selected disabled>Select Brand</option>
+                            </select>
+                            <span id="brandVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Category</label>
+
+                            <select asp-items="@ViewBag.CatList" asp-for="@Model.CategoryId" onchange="getSubCatsById()" id="ddCategory" class="ddsearch form-control border-0 shadow">
+                                <option selected disabled>Select Category</option>
+                            </select>
+                            <span id="catVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">SubCategory</label>
+                            @if (ViewBag.SubCatList != null)
+                            {
+                                <select asp-items="@ViewBag.SubCatList" asp-for="@Model.SubCategoryId" id="ddSubCategory" class="ddsearch form-control border-0 shadow">
+                                    <option selected disabled>Select SubCategory</option>
+                                </select>
+                            }
+                            <span id="subCatVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Measurment Type</label>
+                            <select asp-items="@ViewBag.MTypesList" asp-for="@Model.MeasurmentTypeId" id="ddMType" class="ddsearch form-control border-0 shadow">
+                                <option selected disabled>Select Measurment Type</option>
+                            </select>
+                            <span id="MTypeVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Name</label>
+                            <input type="text" class="form-control border-0 shadow" asp-for="Name" id="proName" />
+                            <span asp-validation-for="Name" id="proNameVal" class="text-danger"></span>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Description</label>
+                            <textarea class="form-control border-0 shadow" asp-for="Description" id="desc"></textarea>
+                            <span id="descVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Order</label>
+                            <input type="text" class="form-control border-0 shadow" asp-for="Order" id="orderby" />
+                            <span asp-validation-for="Order" id="orderVal" class="text-danger"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                            <div class="form-floating py-2 col-12">
+                                <label class="ms-2">Select Image</label>
+                                <input type="file" accept="image" @* multiple *@ class="form-control border-0 shadow" id="file" name="file" />
+                                <span id="imageVal" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="row pt-2">
+                            @if (Model?.Id > 0)
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('update')" class="btn btn-info form-control">Update</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('save')" class="btn btn-success form-control">Save</button>
+                                </div>
+                            }
+                            <div class="col-2">
+                                <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn bg-gradient-dark form-control">Back</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-2">
+                    <div id="picturesArea" class="form-floating">
+                        @* <img src="@Model?.Image" class="img-fluid pt-1" onclick="removeMe(this)" width="100%" style="border-radius:5px;border:1px solid #bbb9b9" /> *@
+
+                    </div>
+                </div>
+            </div>
+        </form>
+        @* <div id="imageTemplate">
+        <img src="" class="img-fluid pt-1" width="100%" onclick="removeMe(this)" />
+        </div> *@
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align lineheight | numlist bullist indent outdent | emoticons charmap',
+        });
+    </script>
+    <script src="~/admin/js/product.js"></script>
+    <partial name="_validationscriptspartial" />
+}

@@ -1,0 +1,224 @@
+﻿@using ECommerceSiteWithAPIs.Models.Dtos
+@model StockDto
+@{
+    ViewData["Title"] = "Upsert";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+<style>
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #f9f1f1 !important;
+        box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12), 0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07) !important;
+    }
+
+    .select2-container .select2-selection--single {
+        height: 51px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 49px !important;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #344767;
+        margin-left: 11px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 27px !important;
+        position: absolute !important;
+        top: 13px !important;
+        right: 1px !important;
+        width: 27px !important;
+    }
+
+    .select2-container {
+        width: 1048.21px;
+    }
+</style>
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-gradient-dark ml-0 py-1">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h3 class="text-white py-2">@(Model?.Id > 0 ? "Update" : "Create") Stock</h3>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="card-body p-4">
+        <form enctype="multipart/form-data" id="proForm" method="Post" asp-action="Upsert">
+            @* <input asp-for="ImageId" id="imageId" hidden /> *@
+            <input asp-for="Id" id="proId" hidden />
+            @* <input asp-for="Image" id="proId" hidden /> *@
+            <input asp-for="CreateUser" value="1" hidden />
+            <input asp-for="ModifyUser" value="1" hidden />
+            <div class="row">
+                <div class="col-10">
+                    <div class="border p-3">
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Status</label>
+                            <select asp-for="@Model.Status" id="status" class="form-control border-0 shadow">
+                                <option value="0">Active</option>
+                                <option value="1">Inactive</option>
+                            </select>
+                            <span id="statusVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Category</label>
+
+                            <select asp-items="@ViewBag.ProList" asp-for="@Model.ProductId" id="ddProducts" class="ddsearch form-control border-0 shadow">
+                                <option selected disabled>Select Product</option>
+                            </select>
+                            <span id="catVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div>
+                        @* <div class="form-floating py-2 col-12">
+                            <label class="ms-2">Brand</label>
+                            <select id="ddBrand" class="ddsearch form-control border-0 shadow">
+                                <option selected disabled>Select Brand</option>
+                            </select>
+                            <span id="brandVal" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                        </div> *@
+                        <div class="row">
+                            <div class="col-12">
+                            </div>
+                            <div class="form-floating py-2 col-12">
+                                <label class="ms-2">Select Image</label>
+                                <input type="file" accept="image" @* multiple *@ class="form-control border-0 shadow" id="file" name="file" />
+                                <span id="imageVal" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row pt-2">
+                            @if (Model?.Id > 0)
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('update')" class="btn btn-info form-control">Update</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-2">
+                                    <button @*type="submit"*@ onclick="btnUpsert('save')" class="btn btn-success form-control">Save</button>
+                                </div>
+                            }
+                            <div class="col-2">
+                                <a asp-area="Admin" asp-controller="Stock" asp-action="Index" class="btn bg-gradient-dark form-control">Back</a>
+                            </div>
+                        </div>
+                    </div>
+                <br />
+                </div>
+                
+                <div class="col-2">
+                    <div id="picturesArea" class="form-floating">
+                        @* <img src="@Model?.Image" class="img-fluid pt-1" onclick="removeMe(this)" width="100%" style="border-radius:5px;border:1px solid #bbb9b9" /> *@
+
+                    </div>
+                </div>
+            </div>
+        </form>
+        @* <div id="imageTemplate">
+        <img src="" class="img-fluid pt-1" width="100%" onclick="removeMe(this)" />
+        </div> *@
+        <table id="stockTable" class="display">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>MeasurmentType</th>
+                    <th>Measurment</th>
+                    <th>Color</th>
+                    <th>PurchasePrice</th>
+                    <th>SalePrice</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $('.ddsearch').select2();
+        $('#stockTable').DataTable();
+        GetDataSale();
+    });
+
+    function GetDataSale() {
+        // var UserId;
+        // obj = {
+        //     EType: 2
+        // };
+        $.ajax({
+            url: '/Admin/Stock/GetTempStock',
+            method: 'POST',
+            // data: obj,
+            success: function (data) {
+
+                // var data = response.d;
+                // data = JSON.parse(data);
+                //declare array
+                var modified_data = [];
+
+                //for in loop
+                for (var key in data) {
+                    modified_data.push([
+                        data[key].product.brandId,
+                        data[key].product.name,
+                        data[key].measurmentType.name,
+                        data[key].measurment.name,
+                        data[key].color.name,
+                        data[key].purchasePrice,
+                        data[key].salePrice,
+                        data[key].qty,
+                        // data[key].status,
+                        data[key].status == "0" ? `<span class="badge bg-info">Active</span>` : `<span class="badge bg-danger">InActive</span>`,
+                        `<span class="badge bg-info cursor-pointer mr-1" onclick="EditSale('${data[key].id}')">Edit</span> <span class="badge bg-danger cursor-pointer" onclick="DeleteSale('${data[key].id}')">Delete</span>`
+                        // '<span class="badge bg-danger cursor-pointer" onclick="DeleteSale(\'' + data[key].id + '\')">Delete</span>'
+                        // '<a class="btn btn-danger btn-sm mt-1" style="color:white;" onclick="DeleteSale(\'' + data[key].id + '\')">Delete</a>'
+                    ]);
+                }
+                data = modified_data;
+
+                if (data != 'error') {
+                    $("#stockTable").DataTable().destroy();
+                    $('#stockTable').DataTable({
+                        "aaData": data,
+                        "Columns": [
+                            { "aaData": "product.brandId" },
+                            { "aaData": "product.name" },
+                            { "aaData": "measurmentType.name" },
+                            { "aaData": "Measurment.Name" },
+                            { "aaData": "color.name" },
+                            { "aaData": "purchasePrice" },
+                            { "aaData": "salePrice" },
+                            { "aaData": "qty" },
+                            { "aaData": "status" },
+                        ]
+                    });
+                    // sumAmount();
+                }
+            }
+        })
+    }
+</script>

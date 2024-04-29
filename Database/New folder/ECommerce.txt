@@ -1,0 +1,3 @@
+Data Source=tcp:dcpkw.database.windows.net,1433
+User ID=ecuser
+Password=P@ssw0rd
